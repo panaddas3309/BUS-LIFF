@@ -1,173 +1,173 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-<style>
-body { font-family: 'Inter', sans-serif; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- LINE LIFF -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
+<body class="bg-gray-100">
 
-<!-- Loading Screen -->
-<div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-  <img src="https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_light_color_92x30dp.png" alt="Loading" class="mb-4">
-  <p class="text-gray-500 text-lg">กำลังโหลดข้อมูล...</p>
-</div>
-
-<!-- Dashboard Content -->
-<div id="dashboardContent" style="display:none;">
-
-  <!-- โปรไฟล์ + ข้อความกำลังใจ -->
-  <div class="bg-white rounded-2xl shadow-md p-4 mb-6" id="profileCard">
-    <div class="flex items-center mb-3">
-      <img src="" alt="โปรไฟล์" id="profileImage" class="w-16 h-16 rounded-full mr-4 border-2 border-blue-500"/>
-      <div>
-        <p class="text-gray-500">สวัสดีค่ะ</p>
-        <p class="font-bold text-lg text-gray-800" id="profileName"></p>
-        <p class="text-gray-400 text-sm" id="employeeCode"></p>
-      </div>
+  <!-- Loader -->
+  <div id="loader" class="fixed inset-0 flex items-center justify-center bg-white z-50">
+    <div class="flex flex-col items-center">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
+      <p class="mt-4 text-gray-700">กำลังโหลด...</p>
     </div>
-    <p class="text-blue-600 font-medium text-sm" id="motivationMessage"></p>
-  </div>
-
-  <!-- Tabs -->
-  <div class="flex justify-center mb-6 space-x-2">
-    <button id="tab-remain" class="px-5 py-2 rounded-full bg-white text-blue-600 font-semibold shadow-md" onclick="showTab('remain')">สิทธิ์ลาคงเหลือ</button>
-    <button id="tab-used" class="px-5 py-2 rounded-full bg-gray-200 text-gray-500 font-semibold" onclick="showTab('used')">สิทธิ์ลาที่ใช้</button>
   </div>
 
   <!-- Content -->
-  <div id="remain" class="grid gap-4"></div>
-  <div id="used" class="grid gap-4 hidden"></div>
+  <div id="content" class="hidden max-w-2xl mx-auto p-4">
+    <!-- Profile -->
+    <div class="flex items-center bg-white shadow rounded-2xl p-4 mb-4">
+      <img id="profileImage" class="w-16 h-16 rounded-full border" alt="Profile">
+      <div class="ml-4">
+        <p class="font-bold text-lg text-gray-800" id="profileName">ชื่อพนักงาน</p>
+        <p class="text-gray-600" id="employeeId">รหัสพนักงาน: -</p>
+        <p class="text-sm text-blue-600 mt-1" id="greeting"></p>
+      </div>
+    </div>
 
-</div>
+    <!-- Tabs -->
+    <div class="bg-white shadow rounded-2xl p-4">
+      <div class="flex border-b">
+        <button id="tabRemain" class="flex-1 py-2 text-center font-semibold border-b-2 border-blue-500 text-blue-500">สิทธิ์ลาคงเหลือ</button>
+        <button id="tabUsed" class="flex-1 py-2 text-center font-semibold text-gray-500">สิทธิ์ที่ใช้ไป</button>
+      </div>
+      <div id="remainContent" class="mt-4"></div>
+      <div id="usedContent" class="mt-4 hidden"></div>
+    </div>
+  </div>
 
-<script>
-// ข้อความกำลังใจ
-const motivationTexts = [
-  "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
-  "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
-  "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
-  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
-  "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
-  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
-];
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbweaBqP-v0PkITA_TAhRlho-UGIqP_3A4pkk8MBSTsy-Lx9u-Rh1ChCZLn7vSsXXaim/exec";
 
-function getRandomMotivation() {
-  return motivationTexts[Math.floor(Math.random() * motivationTexts.length)];
-}
+    const greetings = [
+      "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+      "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
+      "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
+      "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+      "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
+      "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+    ];
 
-// Tabs toggle
-function showTab(tab) {
-  const remain = document.getElementById("remain");
-  const used = document.getElementById("used");
-  const tabRemain = document.getElementById("tab-remain");
-  const tabUsed = document.getElementById("tab-used");
-
-  if (tab === "remain") {
-    remain.classList.remove("hidden");
-    used.classList.add("hidden");
-    tabRemain.classList.add("bg-white","text-blue-600","shadow-md");
-    tabRemain.classList.remove("bg-gray-200","text-gray-500");
-    tabUsed.classList.add("bg-gray-200","text-gray-500");
-    tabUsed.classList.remove("bg-white","text-blue-600","shadow-md");
-  } else {
-    remain.classList.add("hidden");
-    used.classList.remove("hidden");
-    tabUsed.classList.add("bg-white","text-blue-600","shadow-md");
-    tabUsed.classList.remove("bg-gray-200","text-gray-500");
-    tabRemain.classList.add("bg-gray-200","text-gray-500");
-    tabRemain.classList.remove("bg-white","text-blue-600","shadow-md");
-  }
-}
-
-// Render Tabs
-function renderRemainTab(data) {
-  const remain = document.getElementById('remain');
-  remain.innerHTML = '';
-  const types = [
-    {name:'ลาพักร้อน', emoji:'🌴', value:data[2]}, // C
-    {name:'ลากิจ', emoji:'📄', value:data[3]},    // D
-    {name:'ลาป่วย', emoji:'🤒', value:data[4]},   // E
-    {name:'ขาดงาน', emoji:'❌', value:data[5]}   // F
-  ];
-  types.forEach(t => {
-    const div = document.createElement('div');
-    div.className = "flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform";
-    div.innerHTML = `<div class="flex items-center space-x-3"><span class="text-xl">${t.emoji}</span><span class="font-medium text-gray-700">${t.name}</span></div><span class="text-green-600 font-bold text-lg">${t.value} วัน</span>`;
-    remain.appendChild(div);
-  });
-}
-
-function renderUsedTab(data) {
-  const used = document.getElementById('used');
-  used.innerHTML = '';
-  const types = [
-    {name:'ลาพักร้อน', emoji:'🌴', value:data[2]}, // D
-    {name:'ลากิจ', emoji:'📄', value:data[3]},    // E
-    {name:'ลาป่วย', emoji:'🤒', value:data[4]},   // F
-    {name:'ขาดงาน', emoji:'❌', value:data[5]}   // G
-  ];
-  types.forEach(t => {
-    const div = document.createElement('div');
-    div.className = "flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform";
-    div.innerHTML = `<div class="flex items-center space-x-3"><span class="text-xl">${t.emoji}</span><span class="font-medium text-gray-700">${t.name}</span></div><span class="text-red-600 font-bold text-lg">${t.value} วัน</span>`;
-    used.appendChild(div);
-  });
-}
-
-// Initialize dashboard
-async function initializeDashboard() {
-  const loading = document.getElementById('loadingScreen');
-  const content = document.getElementById('dashboardContent');
-
-  try {
-    await liff.init({ liffId: "2007956727-rbZz9a0z" });
-    if (!liff.isLoggedIn()) liff.login();
-    const profile = await liff.getProfile();
-    const lineUserId = profile.userId;
-
-    // Fetch ข้อมูลจาก Google Apps Script
-    const res = await fetch('https://script.google.com/macros/s/AKfycbweaBqP-v0PkITA_TAhRlho-UGIqP_3A4pkk8MBSTsy-Lx9u-Rh1ChCZLn7vSsXXaim/exec?lineUserId='+lineUserId);
-    const data = await res.json();
-
-    if (!data.found) {
-      window.location.href = 'LineID_Registration.html';
-      return;
+    // Render ข้อมูลแต่ละแท็บ
+    function renderRemainTab(data) {
+      const remainContent = document.getElementById("remainContent");
+      remainContent.innerHTML = `
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div class="p-4 bg-blue-100 rounded-2xl shadow">
+            <i class="fa-solid fa-plane-departure text-2xl text-blue-600"></i>
+            <p class="mt-2 font-semibold">ลาพักร้อน</p>
+            <p class="text-lg font-bold">${data[2]}</p>
+          </div>
+          <div class="p-4 bg-green-100 rounded-2xl shadow">
+            <i class="fa-solid fa-person-walking-luggage text-2xl text-green-600"></i>
+            <p class="mt-2 font-semibold">ลากิจ</p>
+            <p class="text-lg font-bold">${data[3]}</p>
+          </div>
+          <div class="p-4 bg-yellow-100 rounded-2xl shadow">
+            <i class="fa-solid fa-head-side-cough text-2xl text-yellow-600"></i>
+            <p class="mt-2 font-semibold">ลาป่วย</p>
+            <p class="text-lg font-bold">${data[4]}</p>
+          </div>
+          <div class="p-4 bg-red-100 rounded-2xl shadow">
+            <i class="fa-solid fa-ban text-2xl text-red-600"></i>
+            <p class="mt-2 font-semibold">ขาดงาน</p>
+            <p class="text-lg font-bold">${data[5]}</p>
+          </div>
+        </div>`;
     }
 
-    const balanceData = data.balance; // A-F
-    const recordsData = data.records; // A,B,D,E,F,G
+    function renderUsedTab(data) {
+      const usedContent = document.getElementById("usedContent");
+      usedContent.innerHTML = `
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div class="p-4 bg-blue-100 rounded-2xl shadow">
+            <i class="fa-solid fa-plane-departure text-2xl text-blue-600"></i>
+            <p class="mt-2 font-semibold">ลาพักร้อน</p>
+            <p class="text-lg font-bold">${data[3]}</p>
+          </div>
+          <div class="p-4 bg-green-100 rounded-2xl shadow">
+            <i class="fa-solid fa-person-walking-luggage text-2xl text-green-600"></i>
+            <p class="mt-2 font-semibold">ลากิจ</p>
+            <p class="text-lg font-bold">${data[4]}</p>
+          </div>
+          <div class="p-4 bg-yellow-100 rounded-2xl shadow">
+            <i class="fa-solid fa-head-side-cough text-2xl text-yellow-600"></i>
+            <p class="mt-2 font-semibold">ลาป่วย</p>
+            <p class="text-lg font-bold">${data[5]}</p>
+          </div>
+          <div class="p-4 bg-red-100 rounded-2xl shadow">
+            <i class="fa-solid fa-ban text-2xl text-red-600"></i>
+            <p class="mt-2 font-semibold">ขาดงาน</p>
+            <p class="text-lg font-bold">${data[6]}</p>
+          </div>
+        </div>`;
+    }
 
-    // แสดงโปรไฟล์
-    document.getElementById('profileImage').src = profile.pictureUrl;
-    document.getElementById('profileName').textContent = balanceData[1]; // ชื่อจาก Column B
-    document.getElementById('employeeCode').textContent = 'รหัสพนักงาน: ' + balanceData[0];
-    document.getElementById('motivationMessage').textContent = getRandomMotivation();
+    // Init LIFF
+    async function init() {
+      await liff.init({ liffId: "2007956727-rbZz9a0z" });
+      if (!liff.isLoggedIn()) liff.login();
 
-    // Render Tabs
-    renderRemainTab(balanceData);
-    renderUsedTab(recordsData);
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
 
-    // แสดง dashboard และซ่อน loading
-    loading.style.display = 'none';
-    content.style.display = 'block';
+      // เรียก API จาก GAS
+      const res = await fetch(`${GAS_URL}?action=getDashboard&lineUserId=${userId}`);
+      const json = await res.json();
 
-  } catch(e) {
-    console.error(e);
-    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
-    loading.style.display = 'none';
-  }
-}
+      if (!json.success) {
+        window.location.href = "LineID_Registration.html";
+        return;
+      }
 
-// เรียกใช้งาน
-initializeDashboard();
-</script>
+      const { balanceData, recordsData } = json;
 
+      // แสดงโปรไฟล์
+      document.getElementById("profileImage").src = profile.pictureUrl;
+      document.getElementById("profileName").innerText = balanceData[1]; // ชื่อจาก Column B
+      document.getElementById("employeeId").innerText = "รหัสพนักงาน: " + balanceData[0];
+      document.getElementById("greeting").innerText = greetings[Math.floor(Math.random() * greetings.length)];
+
+      // Render tabs
+      renderRemainTab(balanceData);
+      renderUsedTab(recordsData);
+
+      // Toggle tab
+      document.getElementById("tabRemain").addEventListener("click", () => {
+        document.getElementById("remainContent").classList.remove("hidden");
+        document.getElementById("usedContent").classList.add("hidden");
+        document.getElementById("tabRemain").classList.add("text-blue-500","border-blue-500");
+        document.getElementById("tabRemain").classList.remove("text-gray-500");
+        document.getElementById("tabUsed").classList.remove("text-blue-500","border-blue-500");
+        document.getElementById("tabUsed").classList.add("text-gray-500");
+      });
+
+      document.getElementById("tabUsed").addEventListener("click", () => {
+        document.getElementById("remainContent").classList.add("hidden");
+        document.getElementById("usedContent").classList.remove("hidden");
+        document.getElementById("tabUsed").classList.add("text-blue-500","border-blue-500");
+        document.getElementById("tabUsed").classList.remove("text-gray-500");
+        document.getElementById("tabRemain").classList.remove("text-blue-500","border-blue-500");
+        document.getElementById("tabRemain").classList.add("text-gray-500");
+      });
+
+      // ซ่อน Loader
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("content").classList.remove("hidden");
+    }
+
+    init();
+  </script>
 </body>
 </html>
