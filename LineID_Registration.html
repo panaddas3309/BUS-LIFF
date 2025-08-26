@@ -3,61 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ผูก Line ID กับรหัสพนักงาน</title>
+  <title>Line ID Registration</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: #f5f5f5;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
     }
     .container {
       background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
       text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    h2 {
+      margin-bottom: 25px;
+      color: #333;
     }
     input {
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       width: 100%;
       box-sizing: border-box;
-      border-radius: 5px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px;
+      width: 100%;
       font-size: 16px;
       border: none;
-      border-radius: 5px;
-      background-color: #4CAF50;
+      border-radius: 8px;
+      background-color: #667eea;
       color: white;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    button:hover {
-      background-color: #45a049;
+    button:disabled {
+      background-color: #a5b4fc;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #5a67d8;
     }
     .message {
       margin-top: 15px;
       font-weight: bold;
+      min-height: 20px;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>ผูก Line ID กับรหัสพนักงาน</h2>
+    <h2>ลงทะเบียน Line ID พนักงาน</h2>
     <input type="text" id="employeeId" placeholder="รหัสพนักงาน">
-    <input type="text" id="lineUserId" placeholder="Line User ID" readonly>
-    <button onclick="bindLineID()">ส่งข้อมูล</button>
+    <!-- ซ่อน input lineUserId -->
+    <input type="hidden" id="lineUserId">
+    <button id="submitBtn" onclick="bindLineID()">ส่งข้อมูล</button>
     <div class="message" id="message"></div>
   </div>
 
   <script>
+    let isSending = false; // ป้องกันกดซ้ำ
+
     // เริ่ม LIFF
     async function initializeLiff() {
       await liff.init({ liffId: "2007956727-rbZz9a0z" });
@@ -71,9 +93,12 @@
     initializeLiff();
 
     async function bindLineID() {
+      if (isSending) return; // ป้องกันการกดซ้ำ
+
       const employeeId = document.getElementById('employeeId').value.trim();
       const lineUserId = document.getElementById('lineUserId').value.trim();
       const messageDiv = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
 
       if (!employeeId) {
         messageDiv.style.color = 'red';
@@ -81,12 +106,15 @@
         return;
       }
 
+      isSending = true;
+      submitBtn.disabled = true;
+      messageDiv.style.color = '#333';
+      messageDiv.textContent = 'กำลังส่งข้อมูล...';
+
       try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbzIOHRcZXlrJJS5RF6qDJ4kKH-2cC9LvRNa9GYQXPUGrFHhiKI1ChYQOlA-zTyv0NNv/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbx4aSe3H1pvvbWDYvEfS8udLgihvmqSzCd8zT5710c6E-zuPibEhbtA4Ae3_1w851Ov/exec', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `employeeId=${encodeURIComponent(employeeId)}&lineUserId=${encodeURIComponent(lineUserId)}`
         });
 
@@ -94,15 +122,22 @@
 
         if (data.result === 'success') {
           messageDiv.style.color = 'green';
-          messageDiv.textContent = `ผูกสำเร็จสำหรับรหัสพนักงาน ${data.employeeId}`;
+          messageDiv.textContent = 'ผูกสำเร็จ กำลังพาไปหน้า Dashboard...';
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
         } else {
           messageDiv.style.color = 'red';
           messageDiv.textContent = data.message;
+          isSending = false;
+          submitBtn.disabled = false;
         }
       } catch (error) {
         messageDiv.style.color = 'red';
         messageDiv.textContent = 'เกิดข้อผิดพลาดในการส่งข้อมูล';
         console.error(error);
+        isSending = false;
+        submitBtn.disabled = false;
       }
     }
   </script>
