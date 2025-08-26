@@ -2,172 +2,166 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-  <!-- LINE LIFF -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Google style loader */
+    #loading {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .lds-ring {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    .lds-ring div {
+      box-sizing: border-box;
+      display: block;
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      margin: 8px;
+      border: 8px solid #4285F4;
+      border-radius: 50%;
+      animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      border-color: #4285F4 transparent transparent transparent;
+    }
+    .lds-ring div:nth-child(1) { animation-delay: -0.45s; border-color:#34A853 transparent transparent transparent;}
+    .lds-ring div:nth-child(2) { animation-delay: -0.3s; border-color:#FBBC05 transparent transparent transparent;}
+    .lds-ring div:nth-child(3) { animation-delay: -0.15s; border-color:#EA4335 transparent transparent transparent;}
+    @keyframes lds-ring {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
 
-  <!-- Loader -->
-  <div id="loader" class="fixed inset-0 flex items-center justify-center bg-white z-50">
-    <div class="flex flex-col items-center">
-      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
-      <p class="mt-4 text-gray-700">กำลังโหลด...</p>
-    </div>
+<!-- Loader -->
+<div id="loading">
+  <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+</div>
+
+<!-- Main Content -->
+<div id="content" class="hidden max-w-3xl mx-auto p-6">
+  <div class="bg-white rounded-2xl shadow p-6 text-center">
+    <img id="profilePicture" class="w-24 h-24 rounded-full mx-auto mb-4" src="" alt="Profile">
+    <p class="font-bold text-lg text-gray-800" id="profileName"></p>
+    <p class="text-sm text-gray-600 mb-4" id="greeting"></p>
+    <p class="text-gray-700">รหัสพนักงาน: <span id="employeeId"></span></p>
   </div>
 
-  <!-- Content -->
-  <div id="content" class="hidden max-w-2xl mx-auto p-4">
-    <!-- Profile -->
-    <div class="flex items-center bg-white shadow rounded-2xl p-4 mb-4">
-      <img id="profileImage" class="w-16 h-16 rounded-full border" alt="Profile">
-      <div class="ml-4">
-        <p class="font-bold text-lg text-gray-800" id="profileName">ชื่อพนักงาน</p>
-        <p class="text-gray-600" id="employeeId">รหัสพนักงาน: -</p>
-        <p class="text-sm text-blue-600 mt-1" id="greeting"></p>
-      </div>
+  <!-- Tabs -->
+  <div class="mt-6">
+    <ul class="flex border-b">
+      <li class="mr-1">
+        <a class="bg-white inline-block py-2 px-4 text-blue-500 font-semibold" href="#" onclick="openTab(event, 'balanceTab')">สิทธิ์ลาคงเหลือ</a>
+      </li>
+      <li class="mr-1">
+        <a class="bg-white inline-block py-2 px-4 text-blue-500 font-semibold" href="#" onclick="openTab(event, 'recordsTab')">ประวัติการลา</a>
+      </li>
+    </ul>
+
+    <!-- Balance Tab -->
+    <div id="balanceTab" class="tab-content bg-white p-6 rounded-b-2xl shadow">
+      <p><i class="fa-solid fa-plane-departure text-blue-500"></i> ลาพักร้อน: <span id="alBalance"></span></p>
+      <p><i class="fa-solid fa-person-walking-luggage text-green-500"></i> ลากิจ: <span id="blBalance"></span></p>
+      <p><i class="fa-solid fa-head-side-cough text-yellow-500"></i> ลาป่วย: <span id="slBalance"></span></p>
+      <p><i class="fa-solid fa-ban text-red-500"></i> ขาดงาน: <span id="aBalance"></span></p>
     </div>
 
-    <!-- Tabs -->
-    <div class="bg-white shadow rounded-2xl p-4">
-      <div class="flex border-b">
-        <button id="tabRemain" class="flex-1 py-2 text-center font-semibold border-b-2 border-blue-500 text-blue-500">สิทธิ์ลาคงเหลือ</button>
-        <button id="tabUsed" class="flex-1 py-2 text-center font-semibold text-gray-500">สิทธิ์ที่ใช้ไป</button>
-      </div>
-      <div id="remainContent" class="mt-4"></div>
-      <div id="usedContent" class="mt-4 hidden"></div>
+    <!-- Records Tab -->
+    <div id="recordsTab" class="hidden tab-content bg-white p-6 rounded-b-2xl shadow">
+      <p><i class="fa-solid fa-plane-departure text-blue-500"></i> ลาพักร้อน: <span id="alRecords"></span></p>
+      <p><i class="fa-solid fa-person-walking-luggage text-green-500"></i> ลากิจ: <span id="blRecords"></span></p>
+      <p><i class="fa-solid fa-head-side-cough text-yellow-500"></i> ลาป่วย: <span id="slRecords"></span></p>
+      <p><i class="fa-solid fa-ban text-red-500"></i> ขาดงาน: <span id="aRecords"></span></p>
     </div>
   </div>
+</div>
 
-  <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbweaBqP-v0PkITA_TAhRlho-UGIqP_3A4pkk8MBSTsy-Lx9u-Rh1ChCZLn7vSsXXaim/exec";
+<script>
+const scriptUrl = "https://script.google.com/macros/s/AKfycbweaBqP-v0PkITA_TAhRlho-UGIqP_3A4pkk8MBSTsy-Lx9u-Rh1ChCZLn7vSsXXaim/exec"; // <-- ใส่ URL Web App
+const liffId = "2007956727-rbZz9a0z"; // <-- ใส่ LIFF ID
 
-    const greetings = [
-      "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
-      "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
-      "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
-      "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
-      "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
-      "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
-    ];
+// Greeting messages
+const greetings = [
+  "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+  "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
+  "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
+  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+  "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
+  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+];
 
-    // Render ข้อมูลแต่ละแท็บ
-    function renderRemainTab(data) {
-      const remainContent = document.getElementById("remainContent");
-      remainContent.innerHTML = `
-        <div class="grid grid-cols-2 gap-4 text-center">
-          <div class="p-4 bg-blue-100 rounded-2xl shadow">
-            <i class="fa-solid fa-plane-departure text-2xl text-blue-600"></i>
-            <p class="mt-2 font-semibold">ลาพักร้อน</p>
-            <p class="text-lg font-bold">${data[2]}</p>
-          </div>
-          <div class="p-4 bg-green-100 rounded-2xl shadow">
-            <i class="fa-solid fa-person-walking-luggage text-2xl text-green-600"></i>
-            <p class="mt-2 font-semibold">ลากิจ</p>
-            <p class="text-lg font-bold">${data[3]}</p>
-          </div>
-          <div class="p-4 bg-yellow-100 rounded-2xl shadow">
-            <i class="fa-solid fa-head-side-cough text-2xl text-yellow-600"></i>
-            <p class="mt-2 font-semibold">ลาป่วย</p>
-            <p class="text-lg font-bold">${data[4]}</p>
-          </div>
-          <div class="p-4 bg-red-100 rounded-2xl shadow">
-            <i class="fa-solid fa-ban text-2xl text-red-600"></i>
-            <p class="mt-2 font-semibold">ขาดงาน</p>
-            <p class="text-lg font-bold">${data[5]}</p>
-          </div>
-        </div>`;
+// Tab switch
+function openTab(evt, tabName) {
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+  document.getElementById(tabName).classList.remove("hidden");
+}
+
+// Init Dashboard
+async function initializeDashboard() {
+  await liff.init({ liffId });
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
+
+  const profile = await liff.getProfile();
+  const lineUserId = profile.userId;
+
+  try {
+    const res = await fetch(`${scriptUrl}?lineUserId=${lineUserId}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      window.location.href = "LineID_Registration.html";
+      return;
     }
 
-    function renderUsedTab(data) {
-      const usedContent = document.getElementById("usedContent");
-      usedContent.innerHTML = `
-        <div class="grid grid-cols-2 gap-4 text-center">
-          <div class="p-4 bg-blue-100 rounded-2xl shadow">
-            <i class="fa-solid fa-plane-departure text-2xl text-blue-600"></i>
-            <p class="mt-2 font-semibold">ลาพักร้อน</p>
-            <p class="text-lg font-bold">${data[3]}</p>
-          </div>
-          <div class="p-4 bg-green-100 rounded-2xl shadow">
-            <i class="fa-solid fa-person-walking-luggage text-2xl text-green-600"></i>
-            <p class="mt-2 font-semibold">ลากิจ</p>
-            <p class="text-lg font-bold">${data[4]}</p>
-          </div>
-          <div class="p-4 bg-yellow-100 rounded-2xl shadow">
-            <i class="fa-solid fa-head-side-cough text-2xl text-yellow-600"></i>
-            <p class="mt-2 font-semibold">ลาป่วย</p>
-            <p class="text-lg font-bold">${data[5]}</p>
-          </div>
-          <div class="p-4 bg-red-100 rounded-2xl shadow">
-            <i class="fa-solid fa-ban text-2xl text-red-600"></i>
-            <p class="mt-2 font-semibold">ขาดงาน</p>
-            <p class="text-lg font-bold">${data[6]}</p>
-          </div>
-        </div>`;
-    }
+    // Set profile (ใช้ Column B จาก Balance แทนชื่อ LINE)
+    document.getElementById("profilePicture").src = profile.pictureUrl;
+    document.getElementById("profileName").innerText = data.balance[1]; 
+    document.getElementById("employeeId").innerText = data.balance[0];
 
-    // Init LIFF
-    async function init() {
-      await liff.init({ liffId: "2007956727-rbZz9a0z" });
-      if (!liff.isLoggedIn()) liff.login();
+    // Random greeting
+    document.getElementById("greeting").innerText = greetings[Math.floor(Math.random() * greetings.length)];
 
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
+    // Balance (C–F)
+    document.getElementById("alBalance").innerText = data.balance[2];
+    document.getElementById("blBalance").innerText = data.balance[3];
+    document.getElementById("slBalance").innerText = data.balance[4];
+    document.getElementById("aBalance").innerText = data.balance[5];
 
-      // เรียก API จาก GAS
-      const res = await fetch(`${GAS_URL}?action=getDashboard&lineUserId=${userId}`);
-      const json = await res.json();
+    // Records (D–G)
+    document.getElementById("alRecords").innerText = data.records[3];
+    document.getElementById("blRecords").innerText = data.records[4];
+    document.getElementById("slRecords").innerText = data.records[5];
+    document.getElementById("aRecords").innerText = data.records[6];
 
-      if (!json.success) {
-        window.location.href = "LineID_Registration.html";
-        return;
-      }
+    // Show content
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("content").classList.remove("hidden");
 
-      const { balanceData, recordsData } = json;
+  } catch (e) {
+    console.error(e);
+    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล");
+    document.getElementById("loading").style.display = "none";
+  }
+}
 
-      // แสดงโปรไฟล์
-      document.getElementById("profileImage").src = profile.pictureUrl;
-      document.getElementById("profileName").innerText = balanceData[1]; // ชื่อจาก Column B
-      document.getElementById("employeeId").innerText = "รหัสพนักงาน: " + balanceData[0];
-      document.getElementById("greeting").innerText = greetings[Math.floor(Math.random() * greetings.length)];
+initializeDashboard();
+</script>
 
-      // Render tabs
-      renderRemainTab(balanceData);
-      renderUsedTab(recordsData);
-
-      // Toggle tab
-      document.getElementById("tabRemain").addEventListener("click", () => {
-        document.getElementById("remainContent").classList.remove("hidden");
-        document.getElementById("usedContent").classList.add("hidden");
-        document.getElementById("tabRemain").classList.add("text-blue-500","border-blue-500");
-        document.getElementById("tabRemain").classList.remove("text-gray-500");
-        document.getElementById("tabUsed").classList.remove("text-blue-500","border-blue-500");
-        document.getElementById("tabUsed").classList.add("text-gray-500");
-      });
-
-      document.getElementById("tabUsed").addEventListener("click", () => {
-        document.getElementById("remainContent").classList.add("hidden");
-        document.getElementById("usedContent").classList.remove("hidden");
-        document.getElementById("tabUsed").classList.add("text-blue-500","border-blue-500");
-        document.getElementById("tabUsed").classList.remove("text-gray-500");
-        document.getElementById("tabRemain").classList.remove("text-blue-500","border-blue-500");
-        document.getElementById("tabRemain").classList.add("text-gray-500");
-      });
-
-      // ซ่อน Loader
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("content").classList.remove("hidden");
-    }
-
-    init();
-  </script>
 </body>
 </html>
