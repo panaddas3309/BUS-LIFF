@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ผูก ID Line</title>
+  <title>ผูก Line ID กับรหัสพนักงาน</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -51,20 +52,32 @@
   <div class="container">
     <h2>ผูก Line ID กับรหัสพนักงาน</h2>
     <input type="text" id="employeeId" placeholder="รหัสพนักงาน">
-    <input type="text" id="lineUserId" placeholder="Line User ID">
+    <input type="text" id="lineUserId" placeholder="Line User ID" readonly>
     <button onclick="bindLineID()">ส่งข้อมูล</button>
     <div class="message" id="message"></div>
   </div>
 
   <script>
+    // เริ่ม LIFF
+    async function initializeLiff() {
+      await liff.init({ liffId: "2007956727-rbZz9a0z" });
+      if (liff.isLoggedIn()) {
+        const profile = await liff.getProfile();
+        document.getElementById('lineUserId').value = profile.userId;
+      } else {
+        liff.login();
+      }
+    }
+    initializeLiff();
+
     async function bindLineID() {
       const employeeId = document.getElementById('employeeId').value.trim();
       const lineUserId = document.getElementById('lineUserId').value.trim();
       const messageDiv = document.getElementById('message');
 
-      if (!employeeId || !lineUserId) {
+      if (!employeeId) {
         messageDiv.style.color = 'red';
-        messageDiv.textContent = 'กรุณากรอกทั้งรหัสพนักงานและ Line User ID';
+        messageDiv.textContent = 'กรุณากรอกรหัสพนักงาน';
         return;
       }
 
