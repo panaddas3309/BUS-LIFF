@@ -38,7 +38,7 @@ let balanceData = null;
 let recordsData = null;
 
 async function initializeDashboard() {
-  await liff.init({ liffId: "YOUR_LIFF_ID" });
+  await liff.init({ liffId: "2007956727-rbZz9a0z" });
   if (!liff.isLoggedIn()) liff.login();
   const profile = await liff.getProfile();
   const lineUserId = profile.userId;
