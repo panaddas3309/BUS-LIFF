@@ -1,151 +1,140 @@
 <!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ตรวจสอบสิทธิ์การลา</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body { font-family: 'Inter', sans-serif; }
-    </style>
-  </head>
-  <body class="bg-gray-100 min-h-screen p-4">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
 
-    <!-- โปรไฟล์ + ข้อความกำลังใจ -->
-    <div class="bg-white rounded-2xl shadow-md p-4 mb-6">
-      <div class="flex items-center mb-3">
-        <img
-          src="https://via.placeholder.com/60"
-          alt="โปรไฟล์"
-          class="w-16 h-16 rounded-full mr-4 border-2 border-blue-500"
-        />
-        <div>
-          <p class="text-gray-500">สวัสดีค่ะ</p>
-          <p class="font-bold text-lg text-gray-800">นางสาวสมใจ ใจดี</p>
-          <p class="text-gray-400 text-sm">รหัสพนักงาน: 12345</p>
-        </div>
-      </div>
-      <p class="text-blue-600 font-medium text-sm">
-        💪 สู้ๆ นะ! ขอให้ใช้วันลาของคุณอย่างคุ้มค่า
-      </p>
+<div class="bg-white rounded-2xl shadow-md p-4 mb-6" id="profileCard" style="display:none;">
+  <div class="flex items-center mb-3">
+    <img src="https://via.placeholder.com/60" alt="โปรไฟล์" class="w-16 h-16 rounded-full mr-4 border-2 border-blue-500"/>
+    <div>
+      <p class="text-gray-500">สวัสดีค่ะ</p>
+      <p class="font-bold text-lg text-gray-800" id="profileName"></p>
+      <p class="text-gray-400 text-sm" id="employeeCode"></p>
     </div>
+  </div>
+  <p class="text-blue-600 font-medium text-sm">💪 สู้ๆ นะ! ขอให้ใช้วันลาของคุณอย่างคุ้มค่า</p>
+</div>
 
-    <!-- Tabs -->
-    <div class="flex justify-center mb-6 space-x-2">
-      <button
-        id="tab-remain"
-        class="px-5 py-2 rounded-full bg-white text-blue-600 font-semibold shadow-md"
-        onclick="showTab('remain')"
-      >
-        สิทธิ์ลาคงเหลือ
-      </button>
-      <button
-        id="tab-used"
-        class="px-5 py-2 rounded-full bg-gray-200 text-gray-500 font-semibold"
-        onclick="showTab('used')"
-      >
-        สิทธิ์ลาที่ใช้
-      </button>
-    </div>
+<!-- Tabs -->
+<div class="flex justify-center mb-6 space-x-2">
+  <button id="tab-remain" class="px-5 py-2 rounded-full bg-white text-blue-600 font-semibold shadow-md" onclick="showTab('remain')">สิทธิ์ลาคงเหลือ</button>
+  <button id="tab-used" class="px-5 py-2 rounded-full bg-gray-200 text-gray-500 font-semibold" onclick="showTab('used')">สิทธิ์ลาที่ใช้</button>
+</div>
 
-    <!-- Content -->
-    <div id="remain" class="grid gap-4">
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-blue-500 text-xl">🌴</span>
-          <span class="font-medium text-gray-700">ลาพักร้อน</span>
-        </div>
-        <span class="text-green-600 font-bold text-lg">5 วัน</span>
-      </div>
+<!-- Content -->
+<div id="remain" class="grid gap-4"></div>
+<div id="used" class="grid gap-4 hidden"></div>
 
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-yellow-500 text-xl">📄</span>
-          <span class="font-medium text-gray-700">ลากิจ</span>
-        </div>
-        <span class="text-green-600 font-bold text-lg">3 วัน</span>
-      </div>
+<script>
+let balanceData = null;
+let recordsData = null;
 
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-red-500 text-xl">🤒</span>
-          <span class="font-medium text-gray-700">ลาป่วย</span>
-        </div>
-        <span class="text-green-600 font-bold text-lg">10 วัน</span>
-      </div>
+async function initializeDashboard() {
+  await liff.init({ liffId: "YOUR_LIFF_ID" });
+  if (!liff.isLoggedIn()) liff.login();
+  const profile = await liff.getProfile();
+  const lineUserId = profile.userId;
+  document.getElementById('profileName').textContent = profile.displayName;
 
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-gray-500 text-xl">❌</span>
-          <span class="font-medium text-gray-700">ขาดงาน</span>
-        </div>
-        <span class="text-green-600 font-bold text-lg">0 วัน</span>
-      </div>
-    </div>
+  // ดึงข้อมูลจาก Google Apps Script
+  try {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbweaBqP-v0PkITA_TAhRlho-UGIqP_3A4pkk8MBSTsy-Lx9u-Rh1ChCZLn7vSsXXaim/exec?lineUserId='+lineUserId);
+    const data = await res.json();
 
-    <div id="used" class="grid gap-4 hidden">
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-blue-500 text-xl">🌴</span>
-          <span class="font-medium text-gray-700">ลาพักร้อน</span>
-        </div>
-        <span class="text-red-600 font-bold text-lg">7 วัน</span>
-      </div>
+    if (!data.found) {
+      window.location.href = 'LineID_Registration.html';
+      return;
+    }
 
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-yellow-500 text-xl">📄</span>
-          <span class="font-medium text-gray-700">ลากิจ</span>
-        </div>
-        <span class="text-red-600 font-bold text-lg">2 วัน</span>
-      </div>
+    // แยกข้อมูล
+    balanceData = data.balance; // A-F
+    recordsData = data.records; // A,B,D,E,F,G
 
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-red-500 text-xl">🤒</span>
-          <span class="font-medium text-gray-700">ลาป่วย</span>
-        </div>
-        <span class="text-red-600 font-bold text-lg">4 วัน</span>
-      </div>
+    // แสดงรหัสพนักงาน
+    document.getElementById('employeeCode').textContent = 'รหัสพนักงาน: ' + balanceData[0];
 
-      <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform">
-        <div class="flex items-center space-x-3">
-          <span class="text-gray-500 text-xl">❌</span>
-          <span class="font-medium text-gray-700">ขาดงาน</span>
-        </div>
-        <span class="text-red-600 font-bold text-lg">1 วัน</span>
-      </div>
-    </div>
+    // Render Tabs
+    renderRemainTab(balanceData);
+    renderUsedTab(recordsData);
 
-    <!-- Script Toggle -->
-    <script>
-      function showTab(tab) {
-        const remain = document.getElementById("remain");
-        const used = document.getElementById("used");
-        const tabRemain = document.getElementById("tab-remain");
-        const tabUsed = document.getElementById("tab-used");
+    document.getElementById('profileCard').style.display = 'block';
 
-        if (tab === "remain") {
-          remain.classList.remove("hidden");
-          used.classList.add("hidden");
-          tabRemain.classList.add("bg-white", "text-blue-600", "shadow-md");
-          tabRemain.classList.remove("bg-gray-200", "text-gray-500");
-          tabUsed.classList.add("bg-gray-200", "text-gray-500");
-          tabUsed.classList.remove("bg-white", "text-blue-600", "shadow-md");
-        } else {
-          remain.classList.add("hidden");
-          used.classList.remove("hidden");
-          tabUsed.classList.add("bg-white", "text-blue-600", "shadow-md");
-          tabUsed.classList.remove("bg-gray-200", "text-gray-500");
-          tabRemain.classList.add("bg-gray-200", "text-gray-500");
-          tabRemain.classList.remove("bg-white", "text-blue-600", "shadow-md");
-        }
-      }
-    </script>
+  } catch(e) {
+    console.error(e);
+    alert('เกิดข้อผิดพลาดในการดึงข้อมูล');
+  }
+}
 
-  </body>
+function renderRemainTab(data) {
+  const remain = document.getElementById('remain');
+  remain.innerHTML = '';
+
+  const types = [
+    {name:'ลาพักร้อน', emoji:'🌴', value:data[2]}, // C
+    {name:'ลากิจ', emoji:'📄', value:data[3]},    // D
+    {name:'ลาป่วย', emoji:'🤒', value:data[4]},   // E
+    {name:'ขาดงาน', emoji:'❌', value:data[5]}   // F
+  ];
+
+  types.forEach(t => {
+    const div = document.createElement('div');
+    div.className = "flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform";
+    div.innerHTML = `<div class="flex items-center space-x-3"><span class="text-xl">${t.emoji}</span><span class="font-medium text-gray-700">${t.name}</span></div><span class="text-green-600 font-bold text-lg">${t.value} วัน</span>`;
+    remain.appendChild(div);
+  });
+}
+
+function renderUsedTab(data) {
+  const used = document.getElementById('used');
+  used.innerHTML = '';
+
+  const types = [
+    {name:'ลาพักร้อน', emoji:'🌴', value:data[3]}, // D
+    {name:'ลากิจ', emoji:'📄', value:data[4]},    // E
+    {name:'ลาป่วย', emoji:'🤒', value:data[5]},   // F
+    {name:'ขาดงาน', emoji:'❌', value:data[6]}   // G
+  ];
+
+  types.forEach(t => {
+    const div = document.createElement('div');
+    div.className = "flex justify-between items-center bg-white p-4 rounded-2xl shadow hover:scale-102 transition-transform";
+    div.innerHTML = `<div class="flex items-center space-x-3"><span class="text-xl">${t.emoji}</span><span class="font-medium text-gray-700">${t.name}</span></div><span class="text-red-600 font-bold text-lg">${t.value} วัน</span>`;
+    used.appendChild(div);
+  });
+}
+
+function showTab(tab) {
+  const remain = document.getElementById("remain");
+  const used = document.getElementById("used");
+  const tabRemain = document.getElementById("tab-remain");
+  const tabUsed = document.getElementById("tab-used");
+
+  if (tab === "remain") {
+    remain.classList.remove("hidden");
+    used.classList.add("hidden");
+    tabRemain.classList.add("bg-white","text-blue-600","shadow-md");
+    tabRemain.classList.remove("bg-gray-200","text-gray-500");
+    tabUsed.classList.add("bg-gray-200","text-gray-500");
+    tabUsed.classList.remove("bg-white","text-blue-600","shadow-md");
+  } else {
+    remain.classList.add("hidden");
+    used.classList.remove("hidden");
+    tabUsed.classList.add("bg-white","text-blue-600","shadow-md");
+    tabUsed.classList.remove("bg-gray-200","text-gray-500");
+    tabRemain.classList.add("bg-gray-200","text-gray-500");
+    tabRemain.classList.remove("bg-white","text-blue-600","shadow-md");
+  }
+}
+
+initializeDashboard();
+</script>
+</body>
 </html>
