@@ -283,32 +283,46 @@
     </div>
   </div>
 
-  <script>
-    (function(){
-      const versionText = document.getElementById('versionText');
+
+<script src="https://static.line-scdn.net/liff/edge/2.3/liff.js"></script>
+<script>
+  (async function(){
+    const versionText = document.getElementById('versionText');
+    try {
+      const params = new URLSearchParams(location.search);
+      const v = params.get('ver');
+      if(v) versionText.textContent = v;
+    } catch(e){}
+
+    // Initialize LIFF (ถ้าใช้ LIFF)
+    if(window.liff){
       try {
-        const params = new URLSearchParams(location.search);
-        const v = params.get('ver');
-        if(v) versionText.textContent = v;
-      } catch(e){}
+        await liff.init({ liffId: "YOUR_LIFF_ID" }); // ใส่ LIFF ID ของคุณ
+      } catch(err){
+        console.error("LIFF init error", err);
+      }
+    }
 
-      document.getElementById('refreshBtn').addEventListener('click', function(){
-        this.textContent = 'กำลังรีเฟรช...';
-        setTimeout(()=> location.reload(true), 300);
-      });
+    // ปุ่มรีเฟรช (ปุ่มแรก)
+    document.getElementById('refreshBtn').addEventListener('click', function(){
+      this.textContent = 'กำลังรีเฟรช...';
+      location.reload();
+    });
 
-      document.getElementById('closeBtn').addEventListener('click', function(){
-        if(window.liff && typeof window.liff.closeWindow === 'function'){
-          window.liff.closeWindow();
-        } else if (window.close) {
-          window.close();
-        } else {
-          alert('ปิดได้โดยการปิดแท็บ/หน้าต่างนี้');
-        }
-      });
+    // ปุ่มปิด (ปุ่มถัดไป)
+    document.getElementById('closeBtn').addEventListener('click', function(){
+      if(window.liff && typeof window.liff.closeWindow === 'function'){
+        liff.closeWindow(); // ปิดหน้าต่าง LIFF
+      } else if (window.close) {
+        window.close(); // ปิดแท็บปกติ (บางเบราว์เซอร์อาจไม่ทำงาน)
+      } else {
+        alert('โปรดปิดหน้าต่างนี้ด้วยตัวเอง');
+      }
+    });
 
-      document.getElementById('refreshBtn').focus();
-    })();
-  </script>
+    document.getElementById('refreshBtn').focus();
+  })();
+</script>
+
 </body>
 </html>
