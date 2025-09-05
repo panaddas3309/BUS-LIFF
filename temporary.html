@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>กำลังปรับปรุงระบบ — แจ้งลาออนไลน์กำลังมา</title>
+  <meta name="description" content="ระบบกำลังปรับปรุงเพื่อให้สามารถแจ้งลาออนไลน์ได้" />
+  <style>
+    :root{
+      --bg1: #0f172a;
+      --bg2: #0ea5a4;
+      --accent: #7c3aed;
+      --glass: rgba(255,255,255,0.06);
+      --card-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      --radius: 14px;
+      font-family: "Inter", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: radial-gradient(1000px 600px at 10% 10%, rgba(124,58,237,0.14), transparent 8%),
+                  linear-gradient(180deg, var(--bg1) 0%, #071028 60%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px 20px;
+      box-sizing:border-box;
+    }
+
+    .card{
+      width:100%;
+      max-width:980px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      box-shadow: var(--card-shadow);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:0;
+      align-items:stretch;
+    }
+
+    .left{
+      padding:48px 40px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .logo .badge{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background: linear-gradient(135deg,var(--accent),var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size:20px;
+      box-shadow: 0 6px 18px rgba(124,58,237,0.15);
+    }
+    h1{
+      margin:6px 0 8px 0;
+      font-size:28px;
+      line-height:1.05;
+    }
+    p.lead{
+      margin:0 0 20px 0;
+      color: #cfe7ff;
+      opacity:0.95;
+      font-size:15px;
+    }
+
+    .features{
+      display:flex;
+      gap:12px;
+      margin-top:22px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      background: rgba(255,255,255,0.03);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: inset 0 -1px rgba(255,255,255,0.01);
+    }
+
+    .right{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:34px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      border-left: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .status{
+      width:100%;
+      max-width:320px;
+      text-align:center;
+    }
+
+    .status .icon{
+      width:86px;
+      height:86px;
+      border-radius:22px;
+      display:inline-grid;
+      place-items:center;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      box-shadow: 0 6px 18px rgba(2,6,23,0.5), inset 0 -6px rgba(0,0,0,0.3);
+      margin-bottom:12px;
+    }
+
+    .status h2{
+      margin:0;
+      font-size:18px;
+      line-height:1.1;
+    }
+    .status p{
+      margin:8px 0 0 0;
+      color:#cfe7ff;
+      opacity:0.9;
+      font-size:14px;
+    }
+
+    .dots{
+      display:inline-flex;
+      gap:6px;
+      margin-top:14px;
+    }
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--bg2);
+      opacity:0.9;
+      transform: translateY(0);
+      animation: bounce 1s infinite;
+    }
+    .dot.d2{ animation-delay: .12s; }
+    .dot.d3{ animation-delay: .24s; }
+
+    @keyframes bounce {
+      0%{ transform: translateY(0); opacity:.9; }
+      50%{ transform: translateY(-8px); opacity:1; }
+      100%{ transform: translateY(0); opacity:.9; }
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      margin-top:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    .btn{
+      border:0;
+      padding:10px 16px;
+      font-size:15px;
+      border-radius:12px;
+      cursor:pointer;
+      background:linear-gradient(90deg,var(--bg2),var(--accent));
+      color:white;
+      box-shadow: 0 6px 18px rgba(14,165,164,0.12);
+    }
+
+    .btn.ghost{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow:none;
+      color:#d8e9ff;
+    }
+
+    .meta{
+      margin-top:18px;
+      font-size:13px;
+      color:#9fb7d6;
+      opacity:0.9;
+    }
+
+    .bg-pattern{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:0.18;
+      mix-blend-mode:screen;
+    }
+
+    @media (max-width:880px){
+      .card{ grid-template-columns: 1fr; }
+      .right{ order:-1; padding:28px; }
+      .left{ padding:28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="article" aria-labelledby="title">
+      
+      <!-- LEFT SIDE -->
+      <div class="left">
+        <div class="logo">
+          <div class="badge">ระบบ</div>
+          <div>
+            <div style="font-size:13px; color:#bcd9ff; opacity:0.95">ข้อความจากทีมงาน</div>
+            <div style="font-size:12px; color:#8fb5da">อัปเดตฟังก์ชัน</div>
+          </div>
+        </div>
+
+        <h1 id="title">ขณะนี้กำลังปรับปรุงระบบ</h1>
+        <p class="lead">
+          จากเดิมที่ระบบสามารถ <strong>ตรวจสอบสิทธิการลา</strong> ได้เพียงอย่างเดียว  
+          ตอนนี้ทีมงานกำลังอัปเดตเพื่อให้ทุกท่านสามารถ <strong>แจ้งลาออนไลน์ได้</strong>  
+          โปรดรอสักครู่ ระบบใหม่จะพร้อมให้ใช้งานเร็ว ๆ นี้
+        </p>
+
+        <div class="features" role="list" aria-label="ข้อมูล">
+          <div class="chip" role="listitem">📊 ตรวจสอบสิทธิลาคงเหลือ</div>
+          <div class="chip" role="listitem">📝 แจ้งลาออนไลน์ได้ทันที</div>
+          <div class="chip" role="listitem">⚡ ใช้งานสะดวก ทุกที่ ทุกเวลา</div>
+        </div>
+
+        <div style="margin-top:26px; color:#bcd9ff; font-size:13px">
+          <strong>ติดต่อฝ่ายบุคคล:</strong> <span style="opacity:0.95">hr@example.com</span>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE STATUS -->
+      <div class="right" aria-hidden="false">
+        <div class="status" role="status" aria-live="polite">
+          <div class="icon" aria-hidden="true">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="currentColor" stroke-width="0.8" stroke-opacity="0.9" />
+              <path d="M19.4 15a7.95 7.95 0 0 0 .1-1 7.95 7.95 0 0 0-.1-1l2.1-1.6-2-3.5-2.5.8A8.2 8.2 0 0 0 14 5l-.4-2.6H10.4L10 5a8.2 8.2 0 0 0-3 1.1L4.5 5.3 2.5 8.8 4.6 10.4A7.95 7.95 0 0 0 4.5 12c0 .34.02.67.06 1L2.5 14.6l2 3.5 2.5-.8A8.2 8.2 0 0 0 10 19l.4 2.6h3.2L14 19a8.2 8.2 0 0 0 3-1.1l2.5.8 2-3.5L19.4 15z" stroke="currentColor" stroke-width="0.6" stroke-opacity="0.8" />
+            </svg>
+          </div>
+
+          <h2>ระบบใหม่กำลังมา!</h2>
+          <p>เตรียมพบกับฟังก์ชันใหม่ <strong>“แจ้งลาออนไลน์”</strong>  
+             ที่จะช่วยให้การลาของคุณง่ายและรวดเร็วยิ่งขึ้น</p>
+
+          <div class="dots" aria-hidden="true">
+            <div class="dot"></div>
+            <div class="dot d2"></div>
+            <div class="dot d3"></div>
+          </div>
+
+          <div class="actions" role="group" aria-label="การดำเนินการ">
+            <button class="btn" id="refreshBtn" title="รีเฟรชหน้า">รีเฟรชหน้า</button>
+            <button class="btn ghost" id="closeBtn" title="ปิดหน้าต่าง">ปิดหน้าต่าง</button>
+          </div>
+
+          <div class="meta">สถานะ: <strong id="versionText">อัปเดตกำลังดำเนินการ</strong></div>
+        </div>
+      </div>
+
+      <svg class="bg-pattern" width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#7c3aed" stop-opacity="0.5"/>
+            <stop offset="1" stop-color="#0ea5a4" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <circle cx="70" cy="80" r="220" fill="url(#g1)"/>
+        <circle cx="720" cy="420" r="180" fill="url(#g1)"/>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const versionText = document.getElementById('versionText');
+      try {
+        const params = new URLSearchParams(location.search);
+        const v = params.get('ver');
+        if(v) versionText.textContent = v;
+      } catch(e){}
+
+      document.getElementById('refreshBtn').addEventListener('click', function(){
+        this.textContent = 'กำลังรีเฟรช...';
+        setTimeout(()=> location.reload(true), 300);
+      });
+
+      document.getElementById('closeBtn').addEventListener('click', function(){
+        if(window.liff && typeof window.liff.closeWindow === 'function'){
+          window.liff.closeWindow();
+        } else if (window.close) {
+          window.close();
+        } else {
+          alert('ปิดได้โดยการปิดแท็บ/หน้าต่างนี้');
+        }
+      });
+
+      document.getElementById('refreshBtn').focus();
+    })();
+  </script>
+</body>
+</html>
